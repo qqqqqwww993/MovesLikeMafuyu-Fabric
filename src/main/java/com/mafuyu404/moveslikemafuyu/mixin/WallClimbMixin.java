@@ -1,5 +1,6 @@
 package com.mafuyu404.moveslikemafuyu.mixin;
 
+import com.mafuyu404.moveslikemafuyu.event.FallEvent;
 import com.mafuyu404.moveslikemafuyu.event.SlideEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -11,16 +12,20 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LivingEntity.class)
 public abstract class WallClimbMixin {
+    @Unique
+    private double CATCH_DISTANCE = 0.2;
+    private double FALLING_CATCH_DISTANCE = 0.5;
 
     @Inject(method = "onClimbable", at = @At("HEAD"), cancellable = true)
     private void onIsOnLadder(CallbackInfoReturnable<Boolean> cir) {
-        if ((Object)this instanceof Player player) {
+        if ((Object) this instanceof Player player) {
             if (checkWallClimbCondition(player)) {
                 cir.setReturnValue(true);
             }
@@ -33,7 +38,8 @@ public abstract class WallClimbMixin {
         BlockPos upperPos = checkPos.above();
         if (!player.onGround() && isClimbableWall(player.level(), checkPos) && !isClimbableWall(player.level(), upperPos) && !isClimbableWall(player.level(), player.blockPosition().below())) {
             AABB playerBB = player.getBoundingBox();
-            AABB wallBB = new AABB(checkPos).inflate(0.01);
+            double distance = FallEvent.Falling ? FALLING_CATCH_DISTANCE : CATCH_DISTANCE;
+            AABB wallBB = new AABB(checkPos).inflate(distance);
             return playerBB.intersects(wallBB);
         }
         return false;
@@ -49,9 +55,10 @@ public abstract class WallClimbMixin {
     @Inject(method = "isFallFlying", at = @At("HEAD"), cancellable = true)
     private void onCheckFallFlying(CallbackInfoReturnable<Boolean> cir) {
         if (((Entity) (Object) this) instanceof Player player) {
-            if (SlideEvent.enable) {
+//            System.out.print(player.getTags().contains("slide"));
+//            System.out.print("\n");
+            if (player.getTags().contains("slide")) {
                 cir.setReturnValue(true);
-                cir.cancel();
             }
         }
     }
