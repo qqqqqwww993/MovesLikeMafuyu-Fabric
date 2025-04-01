@@ -1,5 +1,6 @@
 package com.mafuyu404.moveslikemafuyu.network;
 
+import com.mafuyu404.moveslikemafuyu.MovesLikeMafuyu;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkRegistry;
@@ -9,7 +10,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
 public class NetworkHandler {
     private static final String PROTOCOL = "1.0";
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
-            new ResourceLocation("taczaddon", "sync_data"),
+            new ResourceLocation(MovesLikeMafuyu.MODID, "sync_data"),
             () -> PROTOCOL,
             PROTOCOL::equals,
             PROTOCOL::equals

@@ -1,7 +1,6 @@
 package com.mafuyu404.moveslikemafuyu.mixin;
 
 import com.mafuyu404.moveslikemafuyu.event.FallEvent;
-import com.mafuyu404.moveslikemafuyu.event.SlideEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
@@ -21,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class WallClimbMixin {
     @Unique
     private double CATCH_DISTANCE = 0.2;
-    private double FALLING_CATCH_DISTANCE = 0.5;
+    private double FALLING_CATCH_DISTANCE = 0.6;
 
     @Inject(method = "onClimbable", at = @At("HEAD"), cancellable = true)
     private void onIsOnLadder(CallbackInfoReturnable<Boolean> cir) {
@@ -55,8 +54,6 @@ public abstract class WallClimbMixin {
     @Inject(method = "isFallFlying", at = @At("HEAD"), cancellable = true)
     private void onCheckFallFlying(CallbackInfoReturnable<Boolean> cir) {
         if (((Entity) (Object) this) instanceof Player player) {
-//            System.out.print(player.getTags().contains("slide"));
-//            System.out.print("\n");
             if (player.getTags().contains("slide")) {
                 cir.setReturnValue(true);
             }

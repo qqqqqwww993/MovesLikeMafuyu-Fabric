@@ -24,7 +24,10 @@ public class SlideMessage {
     public static void handle(SlideMessage msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             ServerPlayer player = ctx.get().getSender();
-            if (msg.slide) if (!player.getTags().contains("slide")) player.addTag("slide");
+            if (player == null) return;
+            if (msg.slide) {
+                if (!player.getTags().contains("slide")) player.addTag("slide");
+            }
             else player.removeTag("slide");
         });
         ctx.get().setPacketHandled(true);
