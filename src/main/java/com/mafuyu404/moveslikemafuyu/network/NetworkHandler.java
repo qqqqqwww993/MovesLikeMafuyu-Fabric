@@ -19,7 +19,9 @@ public class NetworkHandler {
     // 注册数据包
     public static void register() {
         int packetId = 0;
-        CHANNEL.registerMessage(packetId++, SlideMessage.class, SlideMessage::encode, SlideMessage::decode, SlideMessage::handle);
+        CHANNEL.registerMessage(packetId++, TagMessage.class, TagMessage::encode, TagMessage::decode, TagMessage::handle);
+        CHANNEL.registerMessage(packetId++, KnockMessage.class, KnockMessage::encode, KnockMessage::decode, KnockMessage::handle);
+        CHANNEL.registerMessage(packetId++, ConfigMessage.class, ConfigMessage::encode, ConfigMessage::decode, ConfigMessage::handle);
     }
 
     // 发送数据包到客户端
