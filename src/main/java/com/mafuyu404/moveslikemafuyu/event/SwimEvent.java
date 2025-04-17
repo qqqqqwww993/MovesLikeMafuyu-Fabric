@@ -65,19 +65,13 @@ public class SwimEvent {
         }
         if (event.getKey() == options.keyJump.getKey().getValue()) {
             if (!player.isUnderWater() && player.isSwimming()) {
-                options.keyJump.setDown(false);
-                if (SlideEvent.cooldown > 0 || !Config.enable("SwimmingPush") || event.getAction() != InputConstants.PRESS) return;
+//                options.keyJump.setDown(false);
+                if (SlideEvent.cooldown > 0 || !Config.enable("SwimmingPush") || event.getAction() != InputConstants.PRESS || player.getTags().contains("slide")) return;
                 player.setSwimming(false);
-                Vec3 lookDirection = player.getLookAngle();
-                double boost = 0.03;
-                player.setDeltaMovement(
-                    player.getDeltaMovement().add(lookDirection.x * boost, lookDirection.y * boost * 1.5, lookDirection.z * boost)
-                );
                 if (!player.getTags().contains("slide")) {
                     new Timer().schedule(new TimerTask() {
                         public void run() {
-                        SlideEvent.dap_times++;
-                        SlideEvent.startSlide(player);
+                            SlideEvent.startSlide(player);
                         }
                     },110);
                 }

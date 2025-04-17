@@ -22,7 +22,7 @@ import net.minecraftforge.fml.event.config.ModConfigEvent;
 @Mod.EventBusSubscriber(modid = MovesLikeMafuyu.MODID, value = Dist.CLIENT)
 public class CrawEvent {
     private static final int DOUBLE_PRESS_DELAY = 250; // 毫秒
-    private static final int JUMP_TIMER = 250;
+    private static final int JUMP_TIMER = 500;
     private static long lastShiftPressTime;
     private static long lastJumpPressTime;
     @SubscribeEvent
@@ -52,14 +52,15 @@ public class CrawEvent {
                 // 不在爬行状态且双击潜行键那就进入爬行状态
                 startCraw(player);
             }
-            else if (Config.enable("Leap") && player.isSprinting() && currentTime - lastJumpPressTime < JUMP_TIMER && !player.onGround() && !player.isInWater()) {
+            else if (Config.enable("Leap") && player.isSprinting() && currentTime - lastJumpPressTime < JUMP_TIMER && player.getDeltaMovement().y > 0 && !player.onGround() && !player.isInWater()) {
                 // 满足条件就触发飞扑
                 Vec3 lookDirection = player.getLookAngle();
                 double boost = 0.25;
                 player.setDeltaMovement(
-                    player.getDeltaMovement().add(lookDirection.x * boost, 0.1, lookDirection.z * boost)
+                    player.getDeltaMovement().add(lookDirection.x * boost, 0.15, lookDirection.z * boost)
                 );
                 startCraw(player);
+                lastJumpPressTime *= 10;
             }
             lastShiftPressTime = currentTime;
         }
@@ -71,7 +72,7 @@ public class CrawEvent {
             }
         }
         if (event.getKey() == options.keySprint.getKey().getValue() && event.getAction() == InputConstants.PRESS) {
-            if (Config.enable("CrawSlide") && player.getTags().contains("craw") && player.onGround()) {
+            if (Config.enable("CrawSlide") && player.getPose() == Pose.SWIMMING && player.onGround()) {
                 if (SlideEvent.cooldown <= 0) SlideEvent.startSlide(player);
             }
         }

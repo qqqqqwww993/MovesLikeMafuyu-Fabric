@@ -8,6 +8,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Mixin;
@@ -30,6 +31,7 @@ public abstract class LivingEntityMixin {
     private void onIsOnLadder(CallbackInfoReturnable<Boolean> cir) {
         if (!Config.enable("Craw")) return;
         if ((Object) this instanceof Player player) {
+            if (!player.isLocalPlayer()) return;
             if (checkWallClimbCondition(player) && !player.isSpectator()) {
                 cir.setReturnValue(true);
             }
@@ -40,7 +42,7 @@ public abstract class LivingEntityMixin {
         Direction facing = player.getDirection();
         BlockPos checkPos = player.blockPosition().relative(facing);
         BlockPos upperPos = checkPos.above();
-        if (!player.onGround() && isClimbableWall(player.level(), checkPos) && !isClimbableWall(player.level(), upperPos) && !isClimbableWall(player.level(), player.blockPosition().below())) {
+        if (!player.onGround() && isClimbableWall(player.level(), checkPos) && !isClimbableWall(player.level(), upperPos) && !player.level().getBlockState(player.blockPosition().below()).isSolidRender(player.level(), player.blockPosition().below()) && player.level().getBlockState(player.blockPosition()).isAir()) {
             AABB playerBB = player.getBoundingBox();
             double distance = ClimbEvent.Falling ? FALLING_CATCH_DISTANCE : CATCH_DISTANCE;
             AABB wallBB = new AABB(checkPos).inflate(distance);
@@ -51,7 +53,7 @@ public abstract class LivingEntityMixin {
 
     private boolean isClimbableWall(Level level, BlockPos pos) {
         BlockState state = level.getBlockState(pos);
-        return state.isSolidRender(level, pos);
+        return state.isSolidRender(level, pos) || state.getBlock() instanceof SlabBlock;
     }
 
     @Inject(method = "isFallFlying", at = @At("HEAD"), cancellable = true)

@@ -30,9 +30,11 @@ public class SlideEvent {
     private static int DAP_TIMES;
     private static double timer = TIMER;
     private static int air_timer = AIR_TIMER;
-    public static int cooldown = 0;
+    public static int cooldown = COOLDOWN;
     public static int dap_times = DAP_TIMES;
+    public static double dap_motion = 1;
     private static boolean canDap = false;
+    private static boolean dap_refreshed = false;
     private static final long Knock_Delay = 500;
     private static long lastKnockTime = 0;
     @SubscribeEvent
@@ -43,42 +45,57 @@ public class SlideEvent {
 
         if (cooldown > 0 && cooldown <= COOLDOWN) {
             cooldown--;
+            if (!player.isSprinting()) cooldown--;
+            if (player.getSpeed() > 0 && player.getSpeed() < 0.1) cooldown--;
+            if (player.getSpeed() == 0) cooldown--;
             return;
         }
 
         if (player.getTags().contains("slide")) {
-            if (options.keyDown.isDown()) {
+            if (player.getDeltaMovement().length() < 0.1) {
                 cancel(player);
                 return;
             }
             options.keyShift.setDown(true);
-            if (player.isInWater() && dap_times > 0 && Config.enable("Dap")) {
-                canDap = true;
+            Vec3 motion = player.getDeltaMovement();
+            Vec3 lookDirection = player.getLookAngle();
+            if (dap_times == DAP_TIMES && player.isInWater() && !canDap) {
+                dap_times--;
                 player.setDeltaMovement(
-                    player.getDeltaMovement().add(0, 0.1, 0)
+                    motion.add(0, 0.5, 0)
                 );
             }
+            else if (player.isInWater() && canDap && Config.enable("Dap")) {
+//                System.out.print("canDap = false;\n");
+                canDap = false;
+                dap_times--;
+                player.setDeltaMovement(
+                    motion.add(0, 0.7 * dap_motion, 0)
+                );
+                dap_motion *= 0.92;
+            }
             if (!player.onGround() && !player.isInWater()) {
-                if (canDap) {
-                    canDap = false;
-                    dap_times--;
+                if (dap_times > 0 && dap_times != DAP_TIMES && !canDap) {
+                    canDap = true;
+                    dap_refreshed = false;
+                    double boost = 0.1;
+                    player.setDeltaMovement(
+                        motion.add(lookDirection.x*boost, 0, lookDirection.z*boost)
+                    );
                 }
+                // 仅增加下坠
                 player.setDeltaMovement(
                     player.getDeltaMovement().add(0, -0.025, 0)
                 );
                 air_timer--;
                 if (Config.enable("SlideRepeat")) timer = TIMER;
             } else {
+                // 在地上滑行
                 air_timer = AIR_TIMER; // 落地重置滞空时间
                 if (player.level().getBlockState(player.blockPosition().below()).is(BlockTags.ICE)) timer += 0.5;
                 timer--;
                 if (player.getDeltaMovement().y > 0) {
                     timer -= 2;
-                    Vec3 lookDirection = player.getLookAngle();
-                    double boost = 0.04;
-                    player.setDeltaMovement(
-                        player.getDeltaMovement().add(lookDirection.x * boost, 0, lookDirection.z * boost)
-                    );
                 }
             }
             if (timer <= 0 || air_timer <= 0) {
@@ -94,12 +111,21 @@ public class SlideEvent {
         if (player == null || player.isSpectator() || event.getAction() != InputConstants.PRESS) return;
         if (event.getKey() == options.keyJump.getKey().getValue()) {
             if (player.getTags().contains("slide")) {
-                cancel(player);
+                if (Config.enable("Dap") && canDap && !dap_refreshed) {
+                    dap_refreshed = true;
+                    dap_times++;
+                }
+                else cancel(player);
             }
         }
         if (event.getKey() == options.keyShift.getKey().getValue()) {
             if (player.isSprinting() && player.onGround() && !player.isInWater() && !player.isFallFlying() && player.isLocalPlayer()) {
                 if (!player.getTags().contains("craw")) startSlide(player);
+            }
+        }
+        if (event.getKey() == options.keyDown.getKey().getValue()) {
+            if (player.getTags().contains("slide")) {
+                cancel(player);
             }
         }
     }
@@ -137,6 +163,11 @@ public class SlideEvent {
     }
     public static void startSlide(Player player) {
         if (!Config.enable("Slide") || cooldown > 0) return;
+        timer = TIMER;
+        air_timer = AIR_TIMER;
+        dap_times = DAP_TIMES;
+        canDap = false;
+        dap_motion = 1;
         Options options = Minecraft.getInstance().options;
         NetworkHandler.CHANNEL.sendToServer(new TagMessage("slide", true));
         player.setSprinting(true);
@@ -160,9 +191,6 @@ public class SlideEvent {
             player.setDeltaMovement(motion.x, 0, motion.z);
         }
         player.removeTag("slide");
-        timer = TIMER;
-        air_timer = AIR_TIMER;
         cooldown = COOLDOWN;
-        dap_times = DAP_TIMES;
     }
 }
