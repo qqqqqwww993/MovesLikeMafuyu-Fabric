@@ -6,6 +6,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
@@ -26,6 +27,7 @@ public class SwimEvent {
     @SubscribeEvent
     public static void swim(TickEvent.PlayerTickEvent event) {
         Player player = event.player;
+
         if (!player.isLocalPlayer() || player.isSpectator()) return;
         Options options = Minecraft.getInstance().options;
         if (cooldown > 0 && cooldown <= COOLDOWN) {
@@ -38,6 +40,14 @@ public class SwimEvent {
         if (Config.enable("Freestyle") && !player.isUnderWater() && player.isSwimming()) {
             Vec3 motion = player.getDeltaMovement();
             player.setDeltaMovement(motion.x, 0, motion.z);
+        }
+    }
+    @SubscribeEvent
+    public static void serverSwim(TickEvent.PlayerTickEvent event) {
+        Player player = event.player;
+        if (player.isLocalPlayer()) return;
+        if (Config.enable("ShallowSwimming") && player.isInWater() && player.isSprinting()) {
+            player.setForcedPose(Pose.SWIMMING);
         }
     }
     @SubscribeEvent

@@ -9,12 +9,15 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -45,9 +48,10 @@ public class SlideEvent {
 
         if (cooldown > 0 && cooldown <= COOLDOWN) {
             cooldown--;
+            double speed = player.getDeltaMovement().length();
             if (!player.isSprinting()) cooldown--;
-            if (player.getSpeed() > 0 && player.getSpeed() < 0.1) cooldown--;
-            if (player.getSpeed() == 0) cooldown--;
+            if (player.getSpeed() > 0 && player.getSpeed() < 0.15) cooldown--;
+            if (speed < 0.05) cooldown--;
             return;
         }
 
@@ -192,5 +196,11 @@ public class SlideEvent {
         }
         player.removeTag("slide");
         cooldown = COOLDOWN;
+    }
+    @SubscribeEvent
+    public static void avoidDamage(LivingHurtEvent event) {
+        if (event.getEntity().getTags().contains("slide") && event.getSource().is(DamageTypes.FLY_INTO_WALL)) {
+            event.setCanceled(true);
+        }
     }
 }

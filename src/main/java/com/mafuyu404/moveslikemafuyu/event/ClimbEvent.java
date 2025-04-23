@@ -5,6 +5,7 @@ import com.mafuyu404.moveslikemafuyu.MovesLikeMafuyu;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.event.TickEvent;
@@ -32,6 +33,7 @@ public class ClimbEvent {
         double verticalSpeed = player.getDeltaMovement().y;
         Falling = verticalSpeed < 0 && verticalSpeed > -1 && !player.onGround() && !player.isInWater() && !player.isPassenger();
         if (Falling && player.onClimbable() && options.keyShift.isDown()) {
+            if (player.level().getBlockState(player.blockPosition()).is(Blocks.SCAFFOLDING)) return;
             player.setDeltaMovement(0, 0, 0);
         }
     }
