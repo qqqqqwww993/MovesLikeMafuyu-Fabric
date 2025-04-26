@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.zhenshiz.moveslikemafuyu.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "moveslikemafuyu.refmap.json",
+  "mixins": [
+    "FireworkMixin",
+    "LivingEntityMixin",
+    "ShiftMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

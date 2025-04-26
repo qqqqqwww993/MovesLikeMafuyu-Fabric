@@ -1,0 +1,33 @@
+{
+  "moveslikemafuyu.configuration.slide_setting": "滑行配置",
+  "moveslikemafuyu.configuration.enable_slide": "是否启用滑行：疾跑过程中按下潜行键即可贴地滑行。",
+  "moveslikemafuyu.configuration.enable_dap": "是否启用打水漂：滑行到水面时向前跃起。",
+  "moveslikemafuyu.configuration.enable_slide_repeat": "是否启用滑行重置时间：滑行到空中时重置持续时间。",
+  "moveslikemafuyu.configuration.enable_slide_knock": "是否启用滑行撞飞实体：滑行过程中与实体碰撞会停下并撞飞对方。",
+
+  "moveslikemafuyu.configuration.climb_setting": "攀爬配置",
+  "moveslikemafuyu.configuration.enable_climb": "是否启用攀爬：跳起后可爬上两格高的障碍。",
+  "moveslikemafuyu.configuration.enable_climb_jump": "是否启用攀爬跳：攀爬中并按着潜行键时按下跳跃键往上起跳。",
+  "moveslikemafuyu.configuration.enable_falling_rescue": "是否启用失足抢救：在失足后的短暂时间内按潜行键即可站稳。",
+
+  "moveslikemafuyu.configuration.swimming_setting": "游泳配置",
+  "moveslikemafuyu.configuration.enable_shallow_swimming": "是否启用浅水游泳：在一格深的水中按疾跑键进入游泳状态。",
+  "moveslikemafuyu.configuration.enable_swimming_boost": "是否启用水中推进：在游泳状态下按疾跑键消耗氧气向前推进一段距离。",
+  "moveslikemafuyu.configuration.enable_free_style": "是否启用自由泳：径直往上游到水面后进入可同时呼吸和游泳的状态。",
+  "moveslikemafuyu.configuration.enable_swimming_push": "是否启用水上漂：在自由泳状态下按跳跃向前跃出并进入滑行状态。",
+
+  "moveslikemafuyu.configuration.craw_setting": "爬行配置",
+  "moveslikemafuyu.configuration.enable_craw": "是否启用爬行：双击潜行键进入爬行状态，单击退出。",
+  "moveslikemafuyu.configuration.enable_craw_slide": "是否启用爬行中滑行：爬行状态中按下疾跑键触发滑行。",
+  "moveslikemafuyu.configuration.enable_leap": "是否启用飞扑：疾跑跳跃后按下潜行键会触发飞扑并进入爬行状态。",
+  "moveslikemafuyu.configuration.enable_jump_cancel_crawl": "是否启用跳跃取消爬行：跳跃后短时间内进入爬行状态从而触发飞扑。",
+
+  "moveslikemafuyu.configuration.attribute_setting": "属性配置",
+  "moveslikemafuyu.configuration.slide_duration": "滑行时间限制，默认为25， 一秒为20。",
+  "moveslikemafuyu.configuration.slide_air_duration": "空中滑行时间限制，默认为30，一秒是20。",
+  "moveslikemafuyu.configuration.dap_times": "打水漂次数上限，默认为2。",
+  "moveslikemafuyu.configuration.slide_cooldown": "滑行的冷却，默认为60，一秒为20。",
+  "moveslikemafuyu.configuration.climb_jump_cooldown": "攀爬跳的冷却，默认为60，一秒为20。",
+  "moveslikemafuyu.configuration.swimming_boost_cooldown": "水中推进的冷却，默认为60，一秒为20。",
+  "moveslikemafuyu.configuration.swimming_boost_air_cost": "水中推进的氧气消耗，默认为30，氧气上限为300。"
+}

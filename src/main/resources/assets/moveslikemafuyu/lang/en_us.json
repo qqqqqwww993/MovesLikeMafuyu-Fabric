@@ -1,0 +1,33 @@
+{
+  "moveslikemafuyu.configuration.slide_setting": "Slide Configuration",
+  "moveslikemafuyu.configuration.enable_slide": "Enable sliding: Hold sneak key while sprinting to perform ground slide",
+  "moveslikemafuyu.configuration.enable_dap": "Enable water skipping: Automatically leap forward when sliding onto water surface",
+  "moveslikemafuyu.configuration.enable_slide_repeat": "Enable aerial duration reset: Refresh slide duration when airborne",
+  "moveslikemafuyu.configuration.enable_slide_knock": "Enable collision impact: Stop sliding and knockback entities upon collision",
+
+  "moveslikemafuyu.configuration.climb_setting": "Climbing Configuration",
+  "moveslikemafuyu.configuration.enable_climb": "Enable wall scaling: Vault over 2-block high obstacles when jumping",
+  "moveslikemafuyu.configuration.enable_climb_jump": "Enable wall jump: Press jump + sneak during climbing for vertical boost",
+  "moveslikemafuyu.configuration.enable_falling_rescue": "Enable fall recovery: Press sneak mid-air to recover from falls",
+
+  "moveslikemafuyu.configuration.swimming_setting": "Aquatic Configuration",
+  "moveslikemafuyu.configuration.enable_shallow_swimming": "Enable shallow swim: Press sprint in 1-block deep water to swim",
+  "moveslikemafuyu.configuration.enable_swimming_boost": "Enable aquatic dash: Consume oxygen for burst propulsion while swimming",
+  "moveslikemafuyu.configuration.enable_free_style": "Enable surface breathing: Maintain swimming state while breathing at water surface",
+  "moveslikemafuyu.configuration.enable_swimming_push": "Enable dolphin leap: Press jump during free swim for aerial glide",
+
+  "moveslikemafuyu.configuration.craw_setting": "Prone Configuration",
+  "moveslikemafuyu.configuration.enable_craw": "Enable prone stance: Double-tap sneak to enter/exit crawling",
+  "moveslikemafuyu.configuration.enable_craw_slide": "Enable prone slide: Press sprint while crawling to slide",
+  "moveslikemafuyu.configuration.enable_leap": "Enable diving lunge: Press sneak after sprint-jump to perform dive",
+  "moveslikemafuyu.configuration.enable_jump_cancel_crawl": "Enable jump transition: Quick prone entry after jump triggers dive",
+
+  "moveslikemafuyu.configuration.attribute_setting": "Attribute Configuration",
+  "moveslikemafuyu.configuration.slide_duration": "Max slide duration (ticks) (Default: 25, 20 ticks = 1s)",
+  "moveslikemafuyu.configuration.slide_air_duration": "Aerial slide duration (ticks) (Default: 30)",
+  "moveslikemafuyu.configuration.dap_times": "Max water skips (Default: 2)",
+  "moveslikemafuyu.configuration.slide_cooldown": "Slide cooldown (ticks) (Default: 60)",
+  "moveslikemafuyu.configuration.climb_jump_cooldown": "Wall jump cooldown (ticks) (Default: 60)",
+  "moveslikemafuyu.configuration.swimming_boost_cooldown": "Aquatic dash cooldown (ticks) (Default: 60)",
+  "moveslikemafuyu.configuration.swimming_boost_air_cost": "Aquatic dash oxygen cost (Default: 30, Max: 300)"
+}
