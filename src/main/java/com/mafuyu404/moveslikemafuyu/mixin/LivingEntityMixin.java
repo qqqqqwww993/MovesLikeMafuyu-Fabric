@@ -11,6 +11,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -42,7 +43,8 @@ public abstract class LivingEntityMixin {
         Direction facing = player.getDirection();
         BlockPos checkPos = player.blockPosition().relative(facing);
         BlockPos upperPos = checkPos.above();
-        if (!player.onGround() && isClimbableWall(player.level(), checkPos) && !isClimbableWall(player.level(), upperPos) && !player.level().getBlockState(player.blockPosition().below()).isSolidRender(player.level(), player.blockPosition().below()) && player.level().getBlockState(player.blockPosition()).isAir()) {
+        BlockPos belowPos = player.blockPosition().below();
+        if (!player.onGround() && isClimbableWall(player.level(), checkPos) && !player.level().getBlockState(belowPos).isSolidRender(player.level(), belowPos) && !isClimbableWall(player.level(), upperPos) && !isClimbableWall(player.level(), player.blockPosition())) {
             AABB playerBB = player.getBoundingBox();
             double distance = ClimbEvent.Falling ? FALLING_CATCH_DISTANCE : CATCH_DISTANCE;
             AABB wallBB = new AABB(checkPos).inflate(distance);
@@ -53,7 +55,8 @@ public abstract class LivingEntityMixin {
 
     private boolean isClimbableWall(Level level, BlockPos pos) {
         BlockState state = level.getBlockState(pos);
-        return state.isSolidRender(level, pos) || state.getBlock() instanceof SlabBlock;
+        VoxelShape collisionShape = state.getCollisionShape(level, pos);
+        return !collisionShape.isEmpty();
     }
 
     @Inject(method = "isFallFlying", at = @At("HEAD"), cancellable = true)

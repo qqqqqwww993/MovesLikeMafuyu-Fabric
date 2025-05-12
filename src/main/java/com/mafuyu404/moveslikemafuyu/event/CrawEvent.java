@@ -13,11 +13,9 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
 
 @Mod.EventBusSubscriber(modid = MovesLikeMafuyu.MODID, value = Dist.CLIENT)
 public class CrawEvent {
@@ -25,6 +23,7 @@ public class CrawEvent {
     private static final int JUMP_TIMER = 500;
     private static long lastShiftPressTime;
     private static long lastJumpPressTime;
+
     @SubscribeEvent
     public static void onClientTick(TickEvent.PlayerTickEvent event) {
         Player player = event.player;
@@ -46,7 +45,7 @@ public class CrawEvent {
             long currentTime = System.currentTimeMillis();
             if (player.getTags().contains("craw")) {
                 // 爬行状态下按潜行键就是退出爬行
-                cancel(player);
+                cancelCraw(player);
             }
             else if (Config.enable("Craw") && currentTime - lastShiftPressTime < DOUBLE_PRESS_DELAY && player.onGround()) {
                 // 不在爬行状态且双击潜行键那就进入爬行状态
@@ -54,6 +53,7 @@ public class CrawEvent {
             }
             else if (Config.enable("Leap") && player.isSprinting() && currentTime - lastJumpPressTime < JUMP_TIMER && player.getDeltaMovement().y > 0 && !player.onGround() && !player.isInWater()) {
                 // 满足条件就触发飞扑
+                // 按下潜行键的时间距离跳跃不能过长lastJumpPressTime
                 Vec3 lookDirection = player.getLookAngle();
                 double boost = 0.25;
                 player.setDeltaMovement(
@@ -67,13 +67,13 @@ public class CrawEvent {
         if (event.getKey() == options.keyJump.getKey().getValue() && event.getAction() == InputConstants.PRESS) {
             lastJumpPressTime = System.currentTimeMillis();
             if (Config.enable("JumpCancelCraw")) {
-                cancel(player);
+                cancelCraw(player);
                 options.keyJump.setDown(false);
             }
         }
         if (event.getKey() == options.keySprint.getKey().getValue() && event.getAction() == InputConstants.PRESS) {
             if (Config.enable("CrawSlide") && player.getPose() == Pose.SWIMMING && player.onGround()) {
-                if (SlideEvent.cooldown <= 0) SlideEvent.startSlide(player);
+                if (SlideEvent.cooldown <= 0 && !player.getTags().contains("slide")) SlideEvent.startSlide(player);
             }
         }
     }
@@ -83,7 +83,7 @@ public class CrawEvent {
         player.addTag("craw");
         player.setSprinting(false);
     }
-    public static void cancel(Player player) {
+    public static void cancelCraw(Player player) {
         NetworkHandler.CHANNEL.sendToServer(new TagMessage("craw", false));
         player.removeTag("craw");
         player.setForcedPose(null);
