@@ -5,11 +5,13 @@ import com.zhenshiz.moveslikemafuyu.Config;
 import com.zhenshiz.moveslikemafuyu.MovesLikeMafuyu;
 import com.zhenshiz.moveslikemafuyu.payload.c2s.KnockPayload;
 import com.zhenshiz.moveslikemafuyu.payload.c2s.TagPayload;
+import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -37,6 +39,7 @@ public class SlideEvent {
     private static boolean dap_refreshed = false;
     private static final long Knock_Delay = 500;
     private static long lastKnockTime = 0;
+    private static CameraType storedCameraType;
 
     @SubscribeEvent
     public static void slideAction(PlayerTickEvent.Pre event) {
@@ -54,6 +57,7 @@ public class SlideEvent {
         }
 
         if (player.getTags().contains("slide")) {
+            if (storedCameraType != null) options.setCameraType(storedCameraType);
             if (player.getDeltaMovement().length() < 0.1) {
                 cancel(player);
                 return;
@@ -142,6 +146,7 @@ public class SlideEvent {
         ArrayList<Entity> entities = new ArrayList<>();
         Vec3 lookDirection = player.getLookAngle();
         AllEntities.forEach(entity -> {
+            if (!(entity instanceof LivingEntity)) return;
             boolean xCheck = (entity.position().x - player.position().x) / lookDirection.x > 0;
             if (!xCheck) return;
             boolean zCheck = (entity.position().z - player.position().z) / lookDirection.z > 0;
@@ -163,6 +168,7 @@ public class SlideEvent {
         canDap = false;
         dap_motion = 1;
         Options options = Minecraft.getInstance().options;
+        storedCameraType = options.getCameraType();
         PacketDistributor.sendToServer(new TagPayload("slide", true));
         player.setSprinting(true);
         player.addTag("slide");

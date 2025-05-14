@@ -44,7 +44,7 @@ public class CrawEvent {
             long currentTime = System.currentTimeMillis();
             if (player.getTags().contains("craw")) {
                 // 爬行状态下按潜行键就是退出爬行
-                cancel(player);
+                cancelCraw(player);
             } else if (Config.ENABLE_CRAW.get() && currentTime - lastShiftPressTime < DOUBLE_PRESS_DELAY && player.onGround()) {
                 // 不在爬行状态且双击潜行键那就进入爬行状态
                 startCraw(player);
@@ -63,13 +63,13 @@ public class CrawEvent {
         if (event.getKey() == options.keyJump.getKey().getValue() && event.getAction() == InputConstants.PRESS) {
             lastJumpPressTime = System.currentTimeMillis();
             if (Config.ENABLE_JUMP_CANCEL_CRAW.get()) {
-                cancel(player);
+                cancelCraw(player);
                 options.keyJump.setDown(false);
             }
         }
         if (event.getKey() == options.keySprint.getKey().getValue() && event.getAction() == InputConstants.PRESS) {
             if (Config.ENABLE_CRAW_SLIDE.get() && player.getPose() == Pose.SWIMMING && player.onGround()) {
-                if (SlideEvent.cooldown <= 0) SlideEvent.startSlide(player);
+                if (SlideEvent.cooldown <= 0 && !player.getTags().contains("slide")) SlideEvent.startSlide(player);
             }
         }
     }
@@ -81,7 +81,7 @@ public class CrawEvent {
         player.setSprinting(false);
     }
 
-    public static void cancel(Player player) {
+    public static void cancelCraw(Player player) {
         PacketDistributor.sendToServer(new TagPayload("craw", false));
         player.removeTag("craw");
         player.setForcedPose(null);

@@ -6,13 +6,11 @@ import com.zhenshiz.moveslikemafuyu.MovesLikeMafuyu;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.InputEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 import java.util.Timer;
@@ -43,14 +41,6 @@ public class SwimEvent {
         }
     }
 
-    @SubscribeEvent
-    public static void serverSwim(PlayerTickEvent.Pre event) {
-        Player player = event.getEntity();
-        if (player.isLocalPlayer()) return;
-        if (Config.ENABLE_SHALLOW_SWIMMING.get() && player.isInWater() && player.isSprinting()) {
-            player.setForcedPose(Pose.SWIMMING);
-        }
-    }
 
     @SubscribeEvent
     public static void onAction(InputEvent.Key event) {
