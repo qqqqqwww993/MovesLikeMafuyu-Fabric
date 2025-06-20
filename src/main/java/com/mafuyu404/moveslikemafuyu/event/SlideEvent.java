@@ -9,6 +9,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
@@ -126,7 +127,7 @@ public class SlideEvent {
             }
         }
         if (event.getKey() == options.keyShift.getKey().getValue()) {
-            if (player.isSprinting() && player.onGround() && !player.isInWater() && !player.isFallFlying() && player.isLocalPlayer()) {
+            if (player.isSprinting() && player.onGround() && !player.isInWater() && !player.isFallFlying() && player.isLocalPlayer() && !options.keyJump.isDown()) {
                 if (!player.getTags().contains("craw")) startSlide(player);
             }
         }
@@ -170,13 +171,13 @@ public class SlideEvent {
         DAP_TIMES = Config.ConfigCache.getInt("DapTimes");
     }
     public static void startSlide(Player player) {
+        Options options = Minecraft.getInstance().options;
         if (!Config.enable("Slide") || cooldown > 0) return;
         timer = TIMER;
         air_timer = AIR_TIMER;
         dap_times = DAP_TIMES;
         canDap = false;
         dap_motion = 1;
-        Options options = Minecraft.getInstance().options;
         storedCameraType = options.getCameraType();
         NetworkHandler.CHANNEL.sendToServer(new TagMessage("slide", true));
         player.setSprinting(true);
@@ -188,6 +189,11 @@ public class SlideEvent {
             player.getDeltaMovement().add(lookDirection.x * boost, 0, lookDirection.z * boost)
         );
         options.keyShift.setDown(true);
+        player.playSound(
+                SoundEvents.GENERIC_SMALL_FALL,
+                0.5f,  // 音量
+                0.8f   // 音调
+        );
     }
     private static void cancel(Player player) {
         NetworkHandler.CHANNEL.sendToServer(new TagMessage("slide", false));

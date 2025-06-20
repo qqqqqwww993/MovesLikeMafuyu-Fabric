@@ -65,8 +65,10 @@ public class CrawEvent {
             lastShiftPressTime = currentTime;
         }
         if (event.getKey() == options.keyJump.getKey().getValue() && event.getAction() == InputConstants.PRESS) {
-            lastJumpPressTime = System.currentTimeMillis();
-            if (Config.enable("JumpCancelCraw")) {
+            if (player.onGround()) {
+                lastJumpPressTime = System.currentTimeMillis();
+            }
+            if (Config.enable("JumpCancelCraw") && player.getTags().contains("craw")) {
                 cancelCraw(player);
                 options.keyJump.setDown(false);
             }

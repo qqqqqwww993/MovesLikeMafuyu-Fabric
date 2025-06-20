@@ -4,20 +4,30 @@ import com.mafuyu404.moveslikemafuyu.Config;
 import com.mafuyu404.moveslikemafuyu.MovesLikeMafuyu;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.spongepowered.asm.mixin.Unique;
 
 @Mod.EventBusSubscriber(modid = MovesLikeMafuyu.MODID, value = Dist.CLIENT)
 public class ClimbEvent {
     private static int COOLDOWN;
     private static long cooldown = COOLDOWN;
     public static boolean Falling = true;
+    private static double CATCH_DISTANCE = 0.2;
+    private static double FALLING_CATCH_DISTANCE = 0.6;
+
     @SubscribeEvent
     public static void tick(TickEvent.PlayerTickEvent event) {
         Player player = event.player;
@@ -51,6 +61,27 @@ public class ClimbEvent {
             }
         }
     }
+
+    public static boolean checkWallClimbCondition(Player player) {
+        Direction facing = player.getDirection();
+        BlockPos checkPos = player.blockPosition().relative(facing);
+        BlockPos upperPos = checkPos.above();
+        BlockPos belowPos = player.blockPosition().below();
+        if (!player.onGround() && isClimbableWall(player.level(), checkPos) && !player.level().getBlockState(belowPos).isSolidRender(player.level(), belowPos) && !isClimbableWall(player.level(), upperPos) && !isClimbableWall(player.level(), player.blockPosition())) {
+            AABB playerBB = player.getBoundingBox();
+            double distance = ClimbEvent.Falling ? FALLING_CATCH_DISTANCE : CATCH_DISTANCE;
+            AABB wallBB = new AABB(checkPos).inflate(distance);
+            return playerBB.intersects(wallBB);
+        }
+        return false;
+    }
+
+    private static boolean isClimbableWall(Level level, BlockPos pos) {
+        BlockState state = level.getBlockState(pos);
+        VoxelShape collisionShape = state.getCollisionShape(level, pos);
+        return !collisionShape.isEmpty();
+    }
+
     @SubscribeEvent
     public static void onConfigLoad(PlayerEvent.PlayerLoggedInEvent event) {
         COOLDOWN = Config.ConfigCache.getInt("ClimbJumpCooldown");
