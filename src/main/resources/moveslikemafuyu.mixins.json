@@ -5,11 +5,14 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "moveslikemafuyu.refmap.json",
   "mixins": [
+    "EntityMixin",
     "FireworkMixin",
-    "ShiftMixin",
-    "LivingEntityMixin"
+    "LivingEntityMixin",
+    "PlayerMixin",
+    "ShiftMixin"
   ],
   "client": [
+    "KeyboardHandlerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

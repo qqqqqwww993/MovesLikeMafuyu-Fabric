@@ -1,59 +1,62 @@
 package com.mafuyu404.moveslikemafuyu.event;
 
-import com.mafuyu404.moveslikemafuyu.Config;
-import com.mafuyu404.moveslikemafuyu.MovesLikeMafuyu;
+import com.mafuyu404.moveslikemafuyu.ModConfig;
 import com.mojang.blaze3d.platform.InputConstants;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
-@Mod.EventBusSubscriber(modid = MovesLikeMafuyu.MODID, value = Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public class SwimEvent {
     private static int COOLDOWN;
     private static int AIR_COST;
     private static int cooldown = COOLDOWN;
-    @SubscribeEvent
-    public static void swim(TickEvent.PlayerTickEvent event) {
-        Player player = event.player;
 
-        if (!player.isLocalPlayer() || player.isSpectator()) return;
+    public static void init() {
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if (client.player != null) {
+                swim(client.player);
+            }
+        });
+    }
+
+    public static void swim(Player player) {
+        if (player.isSpectator()) return;
         Options options = Minecraft.getInstance().options;
         if (cooldown > 0 && cooldown <= COOLDOWN) {
             cooldown--;
         }
-        if (Config.enable("ShallowSwimming") && player.isInWater() && options.keySprint.isDown()) {
+        if (ModConfig.enable("ShallowSwimming") && player.isInWater() && options.keySprint.isDown()) {
             player.setSprinting(true);
             player.setSwimming(true);
         }
-        if (Config.enable("Freestyle") && !player.isUnderWater() && player.isSwimming()) {
+        if (ModConfig.enable("Freestyle") && !player.isUnderWater() && player.isSwimming()) {
             Vec3 motion = player.getDeltaMovement();
             player.setDeltaMovement(motion.x, 0, motion.z);
         }
     }
-    @SubscribeEvent
-    public static void onAction(InputEvent.Key event) {
+
+    public static void handleKeyInput(int key, int action) {
         if (Minecraft.getInstance().screen != null) return;
         Player player = Minecraft.getInstance().player;
         Options options = Minecraft.getInstance().options;
         if (player == null || player.isSpectator()) return;
-        if (Config.enable("SwimmingBoost") && event.getKey() == options.keySprint.getKey().getValue()) {
-            if (cooldown <= 0 && player.isSwimming() && event.getAction() == InputConstants.PRESS) {
+
+        if (ModConfig.enable("SwimmingBoost") && key == options.keySprint.key.getValue()) {
+            if (cooldown <= 0 && player.isSwimming() && action == InputConstants.PRESS) {
                 cooldown = COOLDOWN;
                 Vec3 lookDirection = player.getLookAngle();
                 double boost = 0.4;
                 player.setDeltaMovement(
-                    player.getDeltaMovement().add(lookDirection.x * boost, lookDirection.y * boost, lookDirection.z * boost)
+                        player.getDeltaMovement().add(lookDirection.x * boost, lookDirection.y * boost, lookDirection.z * boost)
                 );
                 player.setAirSupply(player.getAirSupply() - AIR_COST);
                 // 播放水声
@@ -64,10 +67,10 @@ public class SwimEvent {
                 );
             }
         }
-        if (event.getKey() == options.keyJump.getKey().getValue()) {
+
+        if (key == options.keyJump.key.getValue()) {
             if (!player.isUnderWater() && player.isInWater() && player.isSwimming()) {
-//                options.keyJump.setDown(false);
-                if (SlideEvent.cooldown > 0 || !Config.enable("SwimmingPush") || event.getAction() != InputConstants.PRESS || player.getTags().contains("slide")) return;
+                if (SlideEvent.cooldown > 0 || ! ModConfig.enable("SwimmingPush") || action != InputConstants.PRESS || player.getTags().contains("slide")) return;
                 player.setSwimming(false);
                 if (!player.getTags().contains("slide")) {
                     new Timer().schedule(new TimerTask() {
@@ -79,9 +82,9 @@ public class SwimEvent {
             }
         }
     }
-    @SubscribeEvent
-    public static void onConfigLoad(PlayerEvent.PlayerLoggedInEvent event) {
-        COOLDOWN = Config.ConfigCache.getInt("SwimmingBoostCooldown");
-        AIR_COST = Config.ConfigCache.getInt("SwimmingBoostAirCost");
+
+    public static void onConfigLoad() {
+        COOLDOWN = ModConfig.ConfigCache.getInt("SwimmingBoostCooldown");
+        AIR_COST = ModConfig.ConfigCache.getInt("SwimmingBoostAirCost");
     }
 }

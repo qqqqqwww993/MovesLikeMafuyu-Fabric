@@ -1,12 +1,12 @@
 package com.mafuyu404.moveslikemafuyu.network;
 
-import com.mafuyu404.moveslikemafuyu.event.SlideEvent;
+import com.mafuyu404.moveslikemafuyu.util.PlayerForcedPoseAccess;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.network.NetworkEvent;
-
-import java.util.function.Supplier;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 
 public class TagMessage {
     private final String tag;
@@ -17,31 +17,34 @@ public class TagMessage {
         this.state = state;
     }
 
-    public static void encode(TagMessage msg, FriendlyByteBuf buffer) {
-        buffer.writeUtf(msg.tag);
-        buffer.writeBoolean(msg.state);
+    public FriendlyByteBuf encode() {
+        FriendlyByteBuf buffer = PacketByteBufs.create();
+        buffer.writeUtf(this.tag);
+        buffer.writeBoolean(this.state);
+        return buffer;
     }
 
     public static TagMessage decode(FriendlyByteBuf buffer) {
         return new TagMessage(buffer.readUtf(), buffer.readBoolean());
     }
 
-    public static void handle(TagMessage msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
-            ServerPlayer player = ctx.get().getSender();
-            if (player == null) return;
-            if (msg.state) {
-                if (!player.getTags().contains(msg.tag)) {
-                    player.addTag(msg.tag);
+    public static void handleServer(MinecraftServer server, ServerPlayer player,
+                                    ServerGamePacketListenerImpl handler,
+                                    FriendlyByteBuf buffer,
+                                    PacketSender responseSender) {
+        TagMessage message = decode(buffer);
+        server.execute(() -> {
+            if (message.state) {
+                if (!player.getTags().contains(message.tag)) {
+                    player.addTag(message.tag);
                 }
-            }
-            else {
-                player.removeTag(msg.tag);
-                if (msg.tag.equals("craw")) {
-                    player.setForcedPose(null);
+            } else {
+                player.removeTag(message.tag);
+                if (message.tag.equals("craw")) {
+                    PlayerForcedPoseAccess poseAccess = (PlayerForcedPoseAccess) player;
+                    poseAccess.moveslikemafuyu$setForcedPose(null);
                 }
             }
         });
-        ctx.get().setPacketHandled(true);
     }
 }

@@ -1,46 +1,59 @@
 package com.mafuyu404.moveslikemafuyu.event;
 
-import com.mafuyu404.moveslikemafuyu.Config;
-import com.mafuyu404.moveslikemafuyu.MovesLikeMafuyu;
+import com.mafuyu404.moveslikemafuyu.ModConfig;
+import com.mafuyu404.moveslikemafuyu.util.PlayerForcedPoseAccess;
 import com.mafuyu404.moveslikemafuyu.network.ConfigMessage;
 import com.mafuyu404.moveslikemafuyu.network.NetworkHandler;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 
-@Mod.EventBusSubscriber(modid = MovesLikeMafuyu.MODID)
 public class ServerEvent {
     private static CompoundTag config = new CompoundTag();
-    @SubscribeEvent
-    public static void onConfigLoad(PlayerEvent.PlayerLoggedInEvent event) {
-        Player player = event.getEntity();
-        if (player.isLocalPlayer()) return;
-        if (config.isEmpty()) config = Config.getAllConfig();
+
+    public static void init() {
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+            onConfigLoad(handler.getPlayer());
+        });
+
+        ServerTickEvents.END_SERVER_TICK.register(server -> {
+            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                serverSwim(player);
+            }
+        });
+    }
+
+    public static void onConfigLoad(ServerPlayer player) {
+        if (config.isEmpty()) config = ModConfig.getAllConfig();
         // 将服务端配置同步给客户端
-        NetworkHandler.sendToClient((ServerPlayer) event.getEntity(), new ConfigMessage(config));
+        NetworkHandler.sendToClient(player, NetworkHandler.CONFIG_MESSAGE_ID, new ConfigMessage(config));
         player.removeTag("slide");
         player.removeTag("craw");
     }
-    @SubscribeEvent
-    public static void serverSwim(TickEvent.PlayerTickEvent event) {
+
+    public static void serverSwim(Player player) {
         // 服务端同步才能改玩家碰撞箱
-        Player player = event.player;
-        if (player.isLocalPlayer() || player.isSpectator()) return;
-        if (Config.enable("ShallowSwimming") && player.isInWater() && player.isSprinting()) {
-            player.setForcedPose(Pose.SWIMMING);
+        if (player.isSpectator()) return;
+        PlayerForcedPoseAccess poseAccess = (PlayerForcedPoseAccess) player;
+        
+        if (ModConfig.enable("ShallowSwimming") && player.isInWater() && player.isSprinting()) {
+            poseAccess.moveslikemafuyu$setForcedPose(Pose.SWIMMING);
             return;
         }
         if (player.getTags().contains("craw")) {
-            player.setForcedPose(Pose.SWIMMING);
+            poseAccess.moveslikemafuyu$setForcedPose(Pose.SWIMMING);
             return;
         }
-        if (player.getForcedPose() == Pose.SWIMMING) player.setForcedPose(null);
+        // 添加滑铲姿势处理
+        if (player.getTags().contains("slide")) {
+            poseAccess.moveslikemafuyu$setForcedPose(Pose.SWIMMING);
+            return;
+        }
+        if (poseAccess.moveslikemafuyu$getForcedPose() == Pose.SWIMMING) {
+            poseAccess.moveslikemafuyu$setForcedPose(null);
+        }
     }
 }

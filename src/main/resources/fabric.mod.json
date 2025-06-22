@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "moveslikemafuyu",
+  "version": "${mod_version}",
+  "name": "MovesLikeMafuyu",
+  "description": "A lightweight action-oriented mod designed to optimize movement experience during exploration and building.",
+  "authors": [
+    "Mafuyu404",
+    "Flechazo"
+  ],
+  "contact": {},
+  "license": "GNU GPL 3.0",
+  "icon": "",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+     "com.mafuyu404.moveslikemafuyu.MovesLikeMafuyuClient"
+    ],
+    "main": [
+      "com.mafuyu404.moveslikemafuyu.MovesLikeMafuyu"
+    ]
+  },
+  "mixins": [
+    "moveslikemafuyu.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  },
+  "accessWidener": "moveslikemafuyu.accesswidener"
+}

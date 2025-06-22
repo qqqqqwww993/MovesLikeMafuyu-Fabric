@@ -1,6 +1,5 @@
 package com.mafuyu404.moveslikemafuyu.mixin;
 
-import com.mafuyu404.moveslikemafuyu.event.SlideEvent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.FireworkRocketItem;
 import org.spongepowered.asm.mixin.Mixin;

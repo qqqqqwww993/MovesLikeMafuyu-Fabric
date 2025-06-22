@@ -11,17 +11,19 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(value = Player.class)
+@Mixin(Player.class)
 public abstract class ShiftMixin extends LivingEntity {
-
-    protected ShiftMixin(EntityType<? extends LivingEntity> p_20966_, Level p_20967_) {
-        super(p_20966_, p_20967_);
+    protected ShiftMixin(EntityType<? extends LivingEntity> entityType, Level level) {
+        super(entityType, level);
     }
-
-    @Inject(method = "maybeBackOffFromEdge", at = @At("HEAD"), cancellable = true)
-    private void redirectShiftCheck(Vec3 p_36201_, MoverType p_36202_, CallbackInfoReturnable<Vec3> cir) {
+    @Inject(
+            method = "maybeBackOffFromEdge",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    private void onMaybeBackOffFromEdge(Vec3 movement, MoverType moverType, CallbackInfoReturnable<Vec3> cir) {
         if (this.isFallFlying() && this.onGround()) {
-            cir.setReturnValue(p_36201_);
+            cir.setReturnValue(movement);
         }
     }
 }

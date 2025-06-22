@@ -1,7 +1,9 @@
 package com.mafuyu404.moveslikemafuyu.event;
 
-import com.mafuyu404.moveslikemafuyu.Config;
-import com.mafuyu404.moveslikemafuyu.MovesLikeMafuyu;
+import com.mafuyu404.moveslikemafuyu.ModConfig;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.core.BlockPos;
@@ -12,15 +14,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import org.spongepowered.asm.mixin.Unique;
 
-@Mod.EventBusSubscriber(modid = MovesLikeMafuyu.MODID, value = Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public class ClimbEvent {
     private static int COOLDOWN;
     private static long cooldown = COOLDOWN;
@@ -28,15 +23,21 @@ public class ClimbEvent {
     private static double CATCH_DISTANCE = 0.2;
     private static double FALLING_CATCH_DISTANCE = 0.6;
 
-    @SubscribeEvent
-    public static void tick(TickEvent.PlayerTickEvent event) {
-        Player player = event.player;
-        if (!player.isLocalPlayer() || player.isSpectator()) return;
+    public static void init() {
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if (client.player != null) {
+                tick(client.player);
+            }
+        });
+    }
+
+    public static void tick(Player player) {
+        if (player.isSpectator()) return;
         Options options = Minecraft.getInstance().options;
         if (cooldown > 0 && cooldown <= COOLDOWN) {
             cooldown--;
         }
-        if (!Config.enable("FallingRescue")) {
+        if (! ModConfig.enable("FallingRescue")) {
             Falling = false;
             return;
         }
@@ -47,14 +48,14 @@ public class ClimbEvent {
             player.setDeltaMovement(0, 0, 0);
         }
     }
-    @SubscribeEvent
-    public static void jumpOnClimbable(InputEvent.Key event) {
+
+    public static void handleJumpOnClimbable(int key, int action) {
         if (Minecraft.getInstance().screen != null) return;
-        if (!Config.enable("ClimbJump")) return;
+        if (! ModConfig.enable("ClimbJump")) return;
         Player player = Minecraft.getInstance().player;
         Options options = Minecraft.getInstance().options;
         if (player == null || player.isSpectator()) return;
-        if (cooldown <= 0 && event.getKey() == options.keyJump.getKey().getValue()) {
+        if (cooldown <= 0 && key == options.keyJump.key.getValue()) {
             if (player.isShiftKeyDown() && player.onClimbable()) {
                 player.jumpFromGround();
                 cooldown = COOLDOWN;
@@ -82,8 +83,7 @@ public class ClimbEvent {
         return !collisionShape.isEmpty();
     }
 
-    @SubscribeEvent
-    public static void onConfigLoad(PlayerEvent.PlayerLoggedInEvent event) {
-        COOLDOWN = Config.ConfigCache.getInt("ClimbJumpCooldown");
+    public static void onConfigLoad() {
+        COOLDOWN = ModConfig.ConfigCache.getInt("ClimbJumpCooldown");
     }
 }
