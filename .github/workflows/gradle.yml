@@ -12,7 +12,7 @@ on:
     branches: [ "fabric" ]
   pull_request:
     branches: [ "fabric" ]
-
+    workflow_dispatch
 jobs:
   build:
 
