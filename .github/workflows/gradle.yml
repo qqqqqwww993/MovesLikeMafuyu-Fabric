@@ -7,12 +7,7 @@
 
 name: Java CI with Gradle
 
-on:
-  push:
-    branches: [ "fabric" ]
-  pull_request:
-    branches: [ "fabric" ]
-    workflow_dispatch
+on: workflow_dispatch
 jobs:
   build:
 
